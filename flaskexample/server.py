@@ -1,6 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for
 app = Flask(__name__)
 
+
+@app.route('/')
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
 @app.route('/success/<name>')
 def success(name):
    return 'welcome %s' % name
