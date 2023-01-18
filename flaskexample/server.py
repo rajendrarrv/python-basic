@@ -1,45 +1,20 @@
-from flask import Flask
-from flask import render_template
-from flask import request
-
-from flask import Flask, redirect, url_for, request
-
+from flask import Flask, request, render_template, redirect, url_for
 app = Flask(__name__)
-app.config['DEBUG'] = True
 
-
-@app.route('/')
-@app.route('/index')
-def index():
-    users = [ 'Rosalia','Adrianna','Victoria' ]
-    return render_template('index.html', title='Welcome', members=users)
-
-@app.route('/hello')
-def hello_world():
-   return "hello world"
-#  with name    
-@app.route('/product/<name>')
-def get_product(name):
-  return "The product is " + str(name)
-# flask route multiple arguments
-@app.route('/create/<first_name>/<last_name>')
-def create(first_name=None, last_name=None):
-  return 'Hello ' + first_name + ',' + last_name
-
-@app.route('/dashboard/<name>')
-def dashboard(name):
+@app.route('/success/<name>')
+def success(name):
    return 'welcome %s' % name
 
 @app.route('/login',methods = ['POST', 'GET'])
 def login():
    if request.method == 'POST':
-      user = request.form['name']
-      return redirect(url_for('dashboard',name = user))
+      user = request.form['nm']
+      return redirect(url_for('success',name = user))
    else:
-      user = request.args.get('name')
-      return render_template('login.html')
+        return render_template('login.html')
+
+      
+
 
 if __name__ == '__main__':
    app.run(debug = True)
-
-app.run(host='0.0.0.0')
