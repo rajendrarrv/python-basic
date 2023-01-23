@@ -1,20 +1,24 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask
+from flask import render_template
+from flask import request
+
+from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 
-@app.route('/success/<name>')
-def success(name):
+@app.route('/dashboard/<name>')
+def dashboard(name):
    return 'welcome %s' % name
 
 @app.route('/login',methods = ['POST', 'GET'])
 def login():
    if request.method == 'POST':
-      user = request.form['nm']
-      return redirect(url_for('success',name = user))
+      user = request.form['name']
+      print("If")
+      return redirect(url_for('dashboard',name = user))
    else:
-        return render_template('login.html')
-
-      
-
+      user = request.args.get('name')
+      print("Else")
+      return render_template('login.html')
 
 if __name__ == '__main__':
    app.run(debug = True)
