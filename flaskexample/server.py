@@ -1,54 +1,45 @@
+from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, make_response, request, render_template, redirect, url_for
-import sqlite3
-
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.sqlite3'
+app.config['SECRET_KEY'] = "random string"
+
+db = SQLAlchemy(app)
+class students(db.Model):
+   id = db.Column('student_id', db.Integer, primary_key = True)
+   name = db.Column(db.String(100))
+   city = db.Column(db.String(50))
+   addr = db.Column(db.String(200))
+   pin = db.Column(db.String(10))
+
+def __init__(self, name, city, addr,pin):
+   self.name = name
+   self.city = city
+   self.addr = addr
+   self.pin = pin
+   db.create_all()
+
+@app.route('/')
+def show_all():
+   return render_template('show_all.html', students = students.query.all() )
 
 
-@app.route('/enternew')
-def new_student():
-   return render_template('student.html')
+@app.route('/new', methods=['GET', 'POST'])
+def new():
+    if request.method == 'POST':
+        if not request.form['name'] or not request.form['city'] or not request.form['addr']:
+            flash('Please enter all the fields', 'error')
+        else:
+            student = students(request.form['name'], request.form['city'],
+                               request.form['addr'], request.form['pin'])
 
+            db.session.add(student)
+            db.session.commit()
 
+            flash('Record was successfully added')
+            return redirect(url_for('show_all'))
+    return render_template('new.html')
 
-
-@app.route('/addrec',methods = ['POST', 'GET'])
-def addrec():
-   if request.method == 'POST':
-      try:
-         nm = request.form['nm']
-         addr = request.form['add']
-         city = request.form['city']
-         pin = request.form['pin']
-         
-         with sqlite3.connect("database.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO students (name,addr,city,pin) VALUES (?,?,?,?)",(nm,addr,city,pin) )
-            
-            con.commit()
-            msg = "Record successfully added"
-      except:
-         con.rollback()
-         msg = "error in insert operation"
-      
-      finally:
-         return render_template("result.html", msg =msg)
-         con.close()
-
-
-@app.route('/list')
-def list():
-    con = sqlite3.connect("database.db")
-    con.row_factory = sqlite3.Row
-
-    cur = con.cursor()
-    cur.execute("select * from students")
-
-    rows = cur.fetchall();
-    return render_template("list.html", rows=rows)
 if __name__ == '__main__':
-  conn = sqlite3.connect('database.db')
-  print ("Opened database successfully");
-  conn.execute('CREATE TABLE  IF NOT EXISTS students (name TEXT, addr TEXT, city TEXT, pin TEXT)')
-  print ("Table created successfully");
-  conn.close()
-app.run(debug = True)
+   db.create_all()
+   app.run(debug = True)
